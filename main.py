@@ -15,7 +15,7 @@ password = getpass.getpass("Gib dein Passwort ein: ")
 
 
 # Define API URL
-api_url = "https://7pace.viosys.de/api/VIOSYS/odata/v3.2/workLogsWorkItems?$select=EditedTimestamp,CreatedTimestamp,WorkItem,Comment&$filter=(Timestamp%20ge%202025-03-10T00:00:00Z%20and%20Timestamp%20le%202025-03-17T23:59:59Z)"
+
 # Define your NTLM credentials (use domain if required)
 domainuser=domain+'\\'+username
 
