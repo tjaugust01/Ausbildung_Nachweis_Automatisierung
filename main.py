@@ -10,8 +10,8 @@ domain= input("Gib dein Domain ein: ")
 username = input("Gib deinen Usernamen ein: ")
 # Unsichtbare Eingabe
 password = getpass.getpass("Gib dein Passwort ein: ")
-
-
+baseurl= input("Gib dein Base URL ein: ")
+api_url= baseurl + "/api/" + domain + "/odata/v3.2/workLogsWorkItems"
 
 
 # Define API URL
