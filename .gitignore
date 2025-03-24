@@ -1,0 +1,8 @@
+# Ignoriere die .env-Datei
+.env
+
+# Ignoriere virtuelle Umgebungen
+venv/
+
+# Ignoriere IDE-spezifische Dateien
+.idea/
