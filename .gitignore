@@ -1,8 +1,10 @@
 # Ignoriere die .env-Datei
-.env
+setup/.env
 
 # Ignoriere virtuelle Umgebungen
 venv/
 
 # Ignoriere IDE-spezifische Dateien
 .idea/
+
+*.pdf

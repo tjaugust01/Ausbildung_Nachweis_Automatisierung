@@ -19,10 +19,12 @@ Klonen Sie das Repository auf Ihren lokalen Rechner:
 ``git clone <repository-url>`` <br>``cd <repository-name>``
 
 ### 2. Requirements installieren
+``cd setup/``
 ``pip3 install -r requirements.txt``
 
 ### 3. `.env`-Datei konfigurieren
 Benennen Sie die Datei `.env.dist` in `.env` um und füllen Sie die erforderlichen Variablen aus, um die Konfiguration anzupassen. Dies erleichtert die Nutzung (Quality of Life).
+Die .env befindet sich in Setup
 
 #### Beispiel `.env`-Inhalt:
 ``DOMAIN=example.com ``- Domainname des Unternehmens<br>
