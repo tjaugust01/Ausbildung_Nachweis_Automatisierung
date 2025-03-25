@@ -4,7 +4,7 @@ import requests
 import getpass
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
+import datetime
 from requests_ntlm import HttpNtlmAuth
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -22,13 +22,22 @@ def create_worklog_pdf(works, output_pdf="worklogs.pdf"):
     c = canvas.Canvas(output_pdf, pagesize=A4)
     c.setTitle("Worklogs nach Wochentag")
 
+    # Seitenbreite aus A4 auslesen
+    page_width, page_height = A4
+
+    # Schrift einstellen
+    c.setFont("Helvetica", 16)
+
+    # Headline zentrieren
+    # drawCentredString nimmt den x-Wert für die Mitte und zentriert den Text dort
+    c.drawCentredString(page_width / 2, 800, "Ausbildungsnachweis")
+
     # Schrift einstellen
     c.setFont("Helvetica", 12)
 
     # Startposition für den Text
     x_margin = 50
-    y_position = 800  # etwas unterhalb des Seitenrandes
-
+    y_position = 775  # etwas unterhalb des Seitenrandes
     # Für jeden Tag einen Abschnitt
     for day in weekdays_order:
         # Überschrift für den Tag
@@ -55,8 +64,15 @@ def create_worklog_pdf(works, output_pdf="worklogs.pdf"):
                 c.drawString(x_margin + 10, y_position, line_text)
                 y_position -= 20
 
-                line_text = f"{title} | {comment}"
+                line_text = f"{title}"
                 c.drawString(x_margin + 10, y_position, line_text)
+
+
+                if comment:  # Prüfe, ob 'comment' nicht leer ist
+                    y_position -= 20
+                    line_text = f"{comment}"
+                    c.drawString(x_margin + 10, y_position, line_text)
+
                 y_position -= 40
                 # Seitenumbruch, falls wir zu tief kommen
                 if y_position < 50:
@@ -79,8 +95,6 @@ def create_worklog_pdf(works, output_pdf="worklogs.pdf"):
     c.save()
     print(f"PDF wurde erstellt: {output_pdf}")
 def get_credentials():
-    import os
-    import getpass
 
     if os.getenv("BASEURL"):
         baseurl = os.getenv("BASEURL")
@@ -101,7 +115,7 @@ def get_credentials():
         password = os.getenv("PASSWORD")
     else:
         password = getpass.getpass("Gib dein Passwort ein: ")
-    kw=input("Gib die Gewünschte KW an (bswp.:11)")
+    kw=int(input("Gib die Gewünschte KW an (bswp.:11)"))
     return {
         "kw":kw,
         "baseurl": baseurl,
@@ -114,8 +128,10 @@ def get_credentials():
 
 def api_call(api_data):
     kw=api_data["kw"]
-    montag="2025-01-01"
-    sonntag="2025-01-01"
+    current_year = datetime.datetime.now().year
+
+    montag = str(datetime.date.fromisocalendar(current_year, kw, 1))
+    sonntag = str(datetime.date.fromisocalendar(current_year, kw, 7))
     api_url= "https://" + api_data["baseurl"] + "/api/" + api_data["domain"] + "/odata/v3.2/workLogsWorkItems?$select=EditedTimestamp,CreatedTimestamp,WorkItem,Comment&$filter=(Timestamp%20ge%20"+montag+"T00:00:00Z%20and%20Timestamp%20le%20"+sonntag+"T23:59:59Z)"
 
     # Define your NTLM credentials (use domain if required)
@@ -139,10 +155,10 @@ def remove_milliseconds(timestamp):
         return timestamp
 
 def sanitize_data (work):
-    endTime = datetime.strptime(remove_milliseconds(work["EditedTimestamp"]),format("%Y-%m-%dT%H:%M:%SZ"))
-    startTime = datetime.strptime(remove_milliseconds(work["CreatedTimestamp"]),format("%Y-%m-%dT%H:%M:%SZ"))
-    startTime = startTime + timedelta(hours=1)
-    endTime = endTime + timedelta(hours=1)
+    endTime = datetime.datetime.strptime(remove_milliseconds(work["EditedTimestamp"]),format("%Y-%m-%dT%H:%M:%SZ"))
+    startTime = datetime.datetime.strptime(remove_milliseconds(work["CreatedTimestamp"]),format("%Y-%m-%dT%H:%M:%SZ"))
+    startTime = startTime + datetime.timedelta(hours=1)
+    endTime = endTime + datetime.timedelta(hours=1)
     wochen_index=startTime.weekday()
     match wochen_index:
         case 0:
@@ -165,7 +181,7 @@ def sanitize_data (work):
 
     workdata={}
     workdata["weekday"]=weekday
-    workdata["Comment"]=work["Comment"] if work["Comment"] else "Kein Kommentar"
+    workdata["Comment"]=work["Comment"]
     workdata["time"]=time
     workdata["title"]=work["WorkItem"]["System_Title"]
     workdata["startTime"]=startTime
