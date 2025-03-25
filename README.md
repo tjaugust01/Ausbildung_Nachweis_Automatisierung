@@ -5,6 +5,11 @@ Die vollständige Dokumentation befindet sich unter: `/Writerside`
 ## Voraussetzungen
 
 - **Python**: Version 3.8 oder höher muss installiert sein.
+  - ``sudo apt install python3``
+- **PIP**
+  - ``sudo apt-get install python3-pip``
+
+
 
 ## Setup-Anleitung
 
@@ -13,7 +18,10 @@ Klonen Sie das Repository auf Ihren lokalen Rechner:
 
 ``git clone <repository-url>`` <br>``cd <repository-name>``
 
-### 2. `.env`-Datei konfigurieren
+### 2. Requirements installieren
+``pip3 install -r requirements.txt``
+
+### 3. `.env`-Datei konfigurieren
 Benennen Sie die Datei `.env.dist` in `.env` um und füllen Sie die erforderlichen Variablen aus, um die Konfiguration anzupassen. Dies erleichtert die Nutzung (Quality of Life).
 
 #### Beispiel `.env`-Inhalt:
@@ -23,7 +31,7 @@ Benennen Sie die Datei `.env.dist` in `.env` um und füllen Sie die erforderlich
 ``BASEURL=7pace.firma``- Basis-URL (ersetzen Sie 'firma' mit dem tatsächlichen Firmennamen)
 ``
 
-### 3. Skript ausführen
+### 4. Skript ausführen
 Starten Sie das Python-Skript mit folgendem Befehl:<br>
 ``python main.py``
 

@@ -195,5 +195,5 @@ if __name__ == "__main__":
         worklog=sanitize_data(work)
         works.append(worklog)
 
-create_worklog_pdf(works, output_pdf="meine_worklogs.pdf")
+create_worklog_pdf(works, output_pdf="Ausbildungsnachweis.pdf")
 
