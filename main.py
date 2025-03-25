@@ -120,7 +120,6 @@ def api_call(api_data):
 
     # Define your NTLM credentials (use domain if required)
     domainuser=api_data["domain"]+'\\'+ api_data["username"]
-    print(api_url)
     # Make an authenticated request
     response = requests.get(api_url, auth=HttpNtlmAuth(domainuser, api_data["password"]))
 
@@ -178,7 +177,6 @@ if __name__ == "__main__":
     works=[]
     for work in data["value"]:
         worklog=sanitize_data(work)
-        print(worklog)
         works.append(worklog)
 
 create_worklog_pdf(works, output_pdf="meine_worklogs.pdf")
