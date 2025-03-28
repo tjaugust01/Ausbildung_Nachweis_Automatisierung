@@ -14,9 +14,9 @@ if __name__ == "__main__":
         exit()
 
     # 2. Daten bereinigen und strukturieren
-    works = [sanitize_daDADSADA'Äta(work) for work in api_data["value"]]
+    works = [sanitize_data(work) for work in api_data["value"]]
 
     # 3. Daten nach Wochentagen gruppieren
-    grouped_works = group_by_weekday(works)
+    grouped_works=group_by_weekday(works)
     # 4. PDF erstellen
     pdf.create_pdf(grouped_works, credentials["fullname"], credentials["kw"])
