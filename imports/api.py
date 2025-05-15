@@ -11,7 +11,7 @@ def api_call(api_data):
 
     api_url = (
         f"https://{api_data['baseurl']}/api/{api_data['domain']}/odata/v3.2/"
-        f"workLogsWorkItems?$select=EditedTimestamp,CreatedTimestamp,WorkItem,Comment&"
+        f"workLogsWorkItems?$select=Timestamp,PeriodLength,WorkItem,Comment&"
         f"$filter=(Timestamp ge {montag}T00:00:00Z and Timestamp le {sonntag}T23:59:59Z)"
     )
 

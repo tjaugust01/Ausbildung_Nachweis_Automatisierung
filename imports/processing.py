@@ -1,3 +1,4 @@
+import locale
 from collections import defaultdict
 import datetime
 
@@ -8,29 +9,42 @@ def remove_milliseconds(timestamp):
     return timestamp
 
 def sanitize_data(work):
-    endTime = datetime.datetime.strptime(remove_milliseconds(work["EditedTimestamp"]), "%Y-%m-%dT%H:%M:%SZ")
-    startTime = datetime.datetime.strptime(remove_milliseconds(work["CreatedTimestamp"]), "%Y-%m-%dT%H:%M:%SZ")
-
-    startTime += datetime.timedelta(hours=1)  # Zeitzonenanpassung
-    endTime += datetime.timedelta(hours=1)
-
-    weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
-    weekday = weekdays[startTime.weekday()] if 0 <= startTime.weekday() < 7 else "Unbekannt"
-    time = endTime - startTime
-
+    locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
+    startTime = datetime.datetime.strptime(remove_milliseconds(work["Timestamp"]), "%Y-%m-%dT%H:%M:%SZ")
+    endTime = startTime + datetime.timedelta(seconds=work["PeriodLength"])
     return {
-        "weekday": weekday,
-        "Comment": work["Comment"],
-        "time": time,
-        "title": work["WorkItem"]["System_Title"],
-        "startTime": startTime,
-        "endTime": endTime
+        "weekday": startTime.strftime("%A"),
+        "details": {
+            "startTime": startTime,
+            "endTime": endTime,
+            "duration": work["PeriodLength"],
+            "title": work["WorkItem"]["System_Title"],
+            "comment": work["Comment"]
+        }
     }
+def transform_work_data(works):
+    result = {}
 
-def group_by_weekday(work_entries):
-    """Gruppiert Arbeitseinträge nach Wochentagen und entfernt das weekday-Feld aus den einzelnen Einträgen"""
-    grouped_data = defaultdict(list)
-    for entry in work_entries:
-        weekday = entry.pop("weekday")  # Entfernt das Feld und gibt den Wert zurück
-        grouped_data[weekday].append(entry)
-    return dict(grouped_data)
+    for work in works:
+        weekday = work["weekday"].lower()
+        details = work["details"]
+
+        startTime = details["startTime"]
+        endTime = details["endTime"]
+
+        work_element = {"title": details["title"], "duration": details["duration"]}
+
+        if weekday not in result:
+            result[weekday] = {
+                "start": startTime,
+                "end": endTime,
+                "elemente": [work_element]
+            }
+        else:
+            if startTime < result[weekday]["start"]:
+                result[weekday]["start"] = startTime
+            if endTime > result[weekday]["end"]:
+                result[weekday]["end"] = endTime
+            result[weekday]["elemente"].append(work_element)
+
+    return result

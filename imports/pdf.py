@@ -1,82 +1,104 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.units import mm
+
+from reportlab.pdfbase import pdfmetrics        #  ← NEU
+from reportlab.pdfbase.ttfonts import TTFont     #  ← NEU
+from reportlab.pdfbase.pdfmetrics import registerFontFamily  #  ← NEU
+
 from datetime import datetime
+from typing import Dict, Any
+
+# Font **einmal** registrieren – entweder hier oben …
+pdfmetrics.registerFont(TTFont("DejaVuSans", "../fonts/DejaVuSans.ttf"))
+registerFontFamily("DejaVuSans", normal="DejaVuSans")
+
+WEEKDAY_ORDER = [
+    "montag", "dienstag", "mittwoch",
+    "donnerstag", "freitag", "samstag", "sonnntag",
+]
 
 
-def create_pdf(grouped_data, kw, name, filename="Ausbildungsnachweis.pdf"):
+def _seconds_to_hh_mm(seconds: int) -> str:
+    minutes_total = round(seconds / 60)
+    hours, minutes = divmod(minutes_total, 60)
+    return f"{hours:02d}:{minutes:02d}"
+
+def create_pdf(
+    grouped_data: Dict[str, Dict[str, Any]],
+    kw: int,
+    name: str,
+    filename: str = "Ausbildungsnachweis.pdf",
+) -> str:
+
     c = canvas.Canvas(filename, pagesize=A4)
     width, height = A4
 
-    # Layout-Einstellungen
-    margin = 50
-    y_position = height - margin
-    line_height = 15
-    section_gap = 10
+    title_text = f"Ausbildungsnachweis – KW {kw} – {name}"
+    c.setFont("DejaVuSans", 16)
+    title_width = c.stringWidth(title_text, "DejaVuSans", 16)
+    c.drawString((width - title_width) / 2, height - 25 * mm, title_text)
 
-    # Überschrift NUR auf der ersten Seite
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width / 2, height - margin, f"Ausbildungsnachweis KW {kw} - {name}")
-    y_position = height - margin - 30  # Abstand nach der Überschrift
+    y = height - 35 * mm
+    line_height = 6 * mm
+    indent = 10 * mm
+    bullet_indent = 15 * mm
 
-    # Wochentage in Reihenfolge
-    tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
+    c.setFont("DejaVuSans", 10)
 
-    for tag in tage:
-        # Überspringe leere Tage
-        if tag not in grouped_data or not grouped_data[tag]:
+    for weekday_key in WEEKDAY_ORDER:
+        if weekday_key not in grouped_data:
             continue
 
-        # Prüfe, ob genug Platz für den nächsten Tag ist (mind. 2 Einträge + Abstände)
-        if y_position < margin + (3 * line_height + 2 * section_gap):
+        day_data = grouped_data[weekday_key]
+        start_dt: datetime = day_data["start"]
+        end_dt: datetime = day_data["end"]
+        elemente = day_data.get("elemente", [])
+
+        if y < 30 * mm:
             c.showPage()
-            y_position = height - margin  # Neue Seite, ohne Headline
+            c.setFont("DejaVuSans", 10)
+            y = height - 20 * mm
 
-        # Wochentag als Überschrift
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(margin, y_position, tag)
-        y_position -= line_height
+        day_name = grouped_data[weekday_key]
+        header = f"{day_name}: {start_dt.strftime('%H:%M')} – {end_dt.strftime('%H:%M')}"
+        c.drawString(indent, y, header)
+        y -= line_height
 
-        # Einträge gruppieren nach Aufgabe
-        aufgaben = {}
-        for e in grouped_data[tag]:
-            if e['title'] not in aufgaben:
-                aufgaben[e['title']] = []
-            aufgaben[e['title']].append(e)
+        for element in elemente:
+            title = element["title"]
+            duration_str = _seconds_to_hh_mm(int(element["duration"]))
 
-        # Einträge schreiben
-        for aufgabe, eintraege in aufgaben.items():
-            # Prüfe, ob genug Platz für die nächste Aufgabe + Einträge
-            needed_space = (len(eintraege) + 1) * line_height + section_gap
-            if y_position - needed_space < margin:
+            # Wort­umbruch
+            wrapped_lines = []
+            max_line_width = width - (bullet_indent + 15 * mm)
+            current_line = ""
+            for word in title.split():
+                test_line = (current_line + " " + word).strip()
+                if c.stringWidth(test_line, "DejaVuSans", 10) < max_line_width:
+                    current_line = test_line
+                else:
+                    wrapped_lines.append(current_line)
+                    current_line = word
+            if current_line:
+                wrapped_lines.append(current_line)
+
+            # erste Zeile mit Bullet & Dauer
+            bullet_text = f"• {wrapped_lines[0]} ({duration_str})"
+            c.drawString(bullet_indent, y, bullet_text)
+            y -= line_height
+
+            # Folgezeilen
+            for cont_line in wrapped_lines[1:]:
+                c.drawString(bullet_indent + 5 * mm, y, cont_line)
+                y -= line_height
+
+            if y < 20 * mm:
                 c.showPage()
-                y_position = height - margin  # Neue Seite, ohne Wochentag zu wiederholen
+                c.setFont("DejaVuSans", 10)
+                y = height - 20 * mm
 
-            # Aufgabenname
-            c.setFont("Helvetica", 11)
-            c.drawString(margin, y_position, aufgabe)
-            y_position -= line_height
-
-            # Zeitangaben
-            c.setFont("Helvetica", 10)
-            for e in eintraege:
-                # Falls kein Platz mehr, neue Seite
-                if y_position < margin + line_height:
-                    c.showPage()
-                    y_position = height - margin
-
-                start = e['startTime'].strftime("%H:%M")
-                ende = e['endTime'].strftime("%H:%M")
-                dauer = str(e['time'])[-8:-3]  # HH:MM Format
-
-                text = f"{start} - {ende} ({dauer})"
-                if e['Comment']:
-                    text += f" - {e['Comment']}"
-
-                c.drawString(margin + 20, y_position, text)
-                y_position -= line_height
-
-            y_position -= section_gap  # Abstand nach einer Aufgabe
-
-        y_position -= section_gap  # Abstand nach einem Tag
+        y -= line_height / 2
 
     c.save()
+    return filename
