@@ -6,8 +6,8 @@ def api_call(api_data):
     kw = api_data["kw"]
     current_year = datetime.datetime.now().year
 
-    montag = str(datetime.date.fromisocalendar(current_year, kw, 1))
-    sonntag = str(datetime.date.fromisocalendar(current_year, kw, 7))
+    montag = str(datetime.date.fromisocalendar(current_year, int(kw), 1))
+    sonntag = str(datetime.date.fromisocalendar(current_year, int(kw), 7))
 
     api_url = (
         f"https://{api_data['baseurl']}/api/{api_data['domain']}/odata/v3.2/"

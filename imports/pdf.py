@@ -28,7 +28,7 @@ def create_pdf(
     grouped_data: Dict[str, Dict[str, Any]],
     kw: int,
     name: str,
-    filename: str = "Ausbildungsnachweis.pdf",
+    filename: str = "./output/Ausbildungsnachweis.pdf",
 ) -> str:
 
     c = canvas.Canvas(filename, pagesize=A4)
