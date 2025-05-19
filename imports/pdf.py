@@ -7,27 +7,20 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 from datetime import datetime
-from typing import Dict, Any
+
 pdfmetrics.registerFont(TTFont("DejaVuSans", "../fonts/DejaVuSans.ttf"))
 registerFontFamily("DejaVuSans", normal="DejaVuSans")
 
 WEEKDAY_ORDER = [
-    "monday", "tuesday", "wednesday",
-    "thursday", "friday", "saturday", "sunday",
+    "Montag", "Dienstag", "Mittwoch",
+    "Donnerstag", "Freitag", "Samstag", "Sonntag",
 ]
-
-
 def _seconds_to_hh_mm(seconds: int) -> str:
     minutes_total = round(seconds / 60)
     hours, minutes = divmod(minutes_total, 60)
     return f"{hours:02d}:{minutes:02d}"
 
-def create_pdf(
-    grouped_data,
-    kw: int,
-    name: str,
-    filename: str = "./output/Ausbildungsnachweis.pdf",
-) -> str:
+def create_pdf(grouped_data, kw: int, name: str, filename: str = "./output/Ausbildungsnachweis.pdf"):
     c = canvas.Canvas(filename, pagesize=A4)
     width, height = A4
 
@@ -47,11 +40,6 @@ def create_pdf(
         if weekday_key not in grouped_data:
             continue
         day_data = grouped_data[weekday_key]
-        print(grouped_data[weekday_key])
-        exit()
-
-
-
         start_dt: datetime = day_data["start"]
         end_dt: datetime = day_data["end"]
         elemente = day_data.get("elemente", [])
@@ -61,7 +49,7 @@ def create_pdf(
             c.setFont("DejaVuSans", 10)
             y = height - 20 * mm
 
-        day_name = grouped_data[weekday_key]
+        day_name = weekday_key.capitalize()
         header = f"{day_name}: {start_dt.strftime('%H:%M')} – {end_dt.strftime('%H:%M')}"
         c.drawString(indent, y, header)
         y -= line_height
@@ -70,7 +58,6 @@ def create_pdf(
             title = element["title"]
             duration_str = _seconds_to_hh_mm(int(element["duration"]))
 
-            # Wort­umbruch
             wrapped_lines = []
             max_line_width = width - (bullet_indent + 15 * mm)
             current_line = ""

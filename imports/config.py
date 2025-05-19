@@ -8,8 +8,8 @@ load_dotenv(dotenv_path)
 def get_credentials(kw):
     baseurl = os.getenv("BASEURL")
     domain = os.getenv("DOMAIN")
-    username = os.getenv("USERNAME")
-    password = os.getenv("PASSWORD")
+    username = os.getenv("DOMAIN_USERNAME")
+    password = os.getenv("DOMAIN_PASSWORD")
     fullname = os.getenv("FULLNAME")
 
     return {

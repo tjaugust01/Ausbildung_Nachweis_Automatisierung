@@ -11,8 +11,9 @@ def remove_milliseconds(timestamp_str):
 def sanitize_data(work):
     startTime = datetime.datetime.strptime(remove_milliseconds(work["Timestamp"]), "%Y-%m-%dT%H:%M:%SZ")
     endTime = startTime + datetime.timedelta(seconds=work["PeriodLength"])
+    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
     return {
-        "weekday": startTime.strftime("%A"), # Stellt sicher, dass der Wochentag korrekt generiert wird
+        "weekday": startTime.strftime("%A"),
         "details": {
             "startTime": startTime,
             "endTime": endTime,
@@ -26,25 +27,34 @@ def transform_work_data(works):
     result = {}
 
     for work in works:
-        weekday = work["weekday"].lower()
+        weekday = work["weekday"]
         details = work["details"]
 
         startTime = details["startTime"]
         endTime = details["endTime"]
-
         work_element = {"title": details["title"], "duration": details["duration"]}
 
-        if weekday not in result:
+        entry = result.get(weekday)
+        if entry is None:
+            # Erster Eintrag für diesen Wochentag: Initialisieren
             result[weekday] = {
                 "start": startTime,
                 "end": endTime,
-                "elemente": [work_element]
+                "elemente": [work_element.copy()]
             }
         else:
-            if startTime < result[weekday]["start"]:
-                result[weekday]["start"] = startTime
-            if endTime > result[weekday]["end"]:
-                result[weekday]["end"] = endTime
-            result[weekday]["elemente"].append(work_element)
+            # vorhandenen Zeitraum anpassen
+            if startTime < entry["start"]:
+                entry["start"] = startTime
+            if endTime > entry["end"]:
+                entry["end"] = endTime
+
+            # work_element zusammenfassen oder neu hinzufügen
+            for elem in entry["elemente"]:
+                if elem["title"] == work_element["title"]:
+                    elem["duration"] += work_element["duration"]
+                    break
+            else:
+                entry["elemente"].append(work_element.copy())
 
     return result

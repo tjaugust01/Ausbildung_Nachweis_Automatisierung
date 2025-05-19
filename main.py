@@ -17,8 +17,7 @@ if __name__ == "__main__":
         print("Keine Daten erhalten")
         exit()
 
-    # 2. Daten bereinigen und strukturieren
     works = [sanitize_data(work) for work in api_data["value"]]
-    test= transform_work_data(works)
-    print(test)
-    pdf.create_pdf(test,credentials["kw"], credentials["fullname"] )
+    works= transform_work_data(works)
+    pdf.create_pdf(works,credentials["kw"], credentials["fullname"] )
+    print("PDF erstellt")
