@@ -2,20 +2,18 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
 
-from reportlab.pdfbase import pdfmetrics        #  ← NEU
-from reportlab.pdfbase.ttfonts import TTFont     #  ← NEU
-from reportlab.pdfbase.pdfmetrics import registerFontFamily  #  ← NEU
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 from datetime import datetime
 from typing import Dict, Any
-
-# Font **einmal** registrieren – entweder hier oben …
 pdfmetrics.registerFont(TTFont("DejaVuSans", "../fonts/DejaVuSans.ttf"))
 registerFontFamily("DejaVuSans", normal="DejaVuSans")
 
 WEEKDAY_ORDER = [
-    "montag", "dienstag", "mittwoch",
-    "donnerstag", "freitag", "samstag", "sonnntag",
+    "monday", "tuesday", "wednesday",
+    "thursday", "friday", "saturday", "sunday",
 ]
 
 
@@ -25,12 +23,11 @@ def _seconds_to_hh_mm(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}"
 
 def create_pdf(
-    grouped_data: Dict[str, Dict[str, Any]],
+    grouped_data,
     kw: int,
     name: str,
     filename: str = "./output/Ausbildungsnachweis.pdf",
 ) -> str:
-
     c = canvas.Canvas(filename, pagesize=A4)
     width, height = A4
 
@@ -49,8 +46,12 @@ def create_pdf(
     for weekday_key in WEEKDAY_ORDER:
         if weekday_key not in grouped_data:
             continue
-
         day_data = grouped_data[weekday_key]
+        print(grouped_data[weekday_key])
+        exit()
+
+
+
         start_dt: datetime = day_data["start"]
         end_dt: datetime = day_data["end"]
         elemente = day_data.get("elemente", [])

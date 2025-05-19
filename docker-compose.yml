@@ -1,13 +1,10 @@
 version: '3.8' # Oder eine aktuelle Version
 
 services:
-  automatisierung: # Name Ihres Dienstes (können Sie frei wählen)
-    build: . # Dockerfile im aktuellen Verzeichnis verwenden
+  automatisierung:
+    build: .
+    container_name: automatisierung
     volumes:
-      # Hier wird das Mapping definiert: HOST_PATH:CONTAINER_PATH
-      # Wir mappen ein lokales Verzeichnis 'output' zu /app/output im Container
       - ./output:/app/output
-    # Optional: Setzt das Arbeitsverzeichnis im Container, falls nicht im Dockerfile festgelegt
-    # working_dir: /app
-    # Der Befehl, der beim Start ausgeführt werden soll (ersetzt CMD im Dockerfile)
-    command: ["20"] # Oder welcher Parameter auch immer benötigt wird, z.B. "10"
+      - ./:/app
+    command: [ "python3", "main.py" ]

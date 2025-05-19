@@ -5,7 +5,6 @@ from requests_ntlm import HttpNtlmAuth
 def api_call(api_data):
     kw = api_data["kw"]
     current_year = datetime.datetime.now().year
-
     montag = str(datetime.date.fromisocalendar(current_year, int(kw), 1))
     sonntag = str(datetime.date.fromisocalendar(current_year, int(kw), 7))
 
