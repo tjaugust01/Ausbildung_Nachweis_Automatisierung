@@ -1,6 +1,7 @@
 # Projekt-Dokumentation
 
 Die vollständige Dokumentation befindet sich unter: `/Writerside`
+ docker compose run --remove-orphans automatisierung 20
 
 ## Voraussetzungen
 

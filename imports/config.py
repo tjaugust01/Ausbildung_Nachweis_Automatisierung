@@ -5,14 +5,12 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), '../setup/.env')
 load_dotenv(dotenv_path)
 
-def get_credentials():
-    baseurl = os.getenv("BASEURL") or input("Gib dein API URL ein: ")
-    domain = os.getenv("DOMAIN") or input("Gib deine Domain ein: ")
-    username = os.getenv("NICKNAME") or input("Gib deinen Usernamen ein: ")
-    password = os.getenv("PASSWORD") or getpass.getpass("Gib dein Passwort ein: ")
-    fullname = os.getenv("FULLNAME") or input("Dein Vollständiger Name")
-    print(username)
-    kw = int(input("Gib die gewünschte KW an (z. B.: 11): "))
+def get_credentials(kw):
+    baseurl = os.getenv("BASEURL")
+    domain = os.getenv("DOMAIN")
+    username = os.getenv("DOMAIN_USERNAME")
+    password = os.getenv("DOMAIN_PASSWORD")
+    fullname = os.getenv("FULLNAME")
 
     return {
         "kw": kw,
