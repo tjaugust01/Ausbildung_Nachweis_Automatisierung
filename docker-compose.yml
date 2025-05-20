@@ -1,8 +1,0 @@
-services:
-  automatisierung:
-    build: .
-    container_name: automatisierung
-    volumes:
-      - ./output:/app/output
-      - ./:/app
-    command: [ "python", "main.py" ]
